@@ -14,16 +14,14 @@ export const authenticate = async (req, res, next) => {
     const idToken = authHeader.split('Bearer ')[1];
     const decoded = await auth.verifyIdToken(idToken);
 
-    // Fetch the user's Firestore profile
+    // Fetch the user's Firestore profile (if already registered)
     const userDoc = await db.collection(COLLECTIONS.USERS).doc(decoded.uid).get();
-    if (!userDoc.exists) {
-      return res.status(401).json({ error: 'User profile not found. Please complete registration.' });
-    }
 
     req.user = {
       uid: decoded.uid,
       email: decoded.email,
-      ...userDoc.data(),
+      ...(userDoc.exists ? userDoc.data() : {}),
+      profileExists: userDoc.exists,
     };
 
     next();

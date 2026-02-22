@@ -34,7 +34,43 @@ export const LoginView = defineComponent({
 
     // ── Check whether Firebase client SDK is available ─────────────────────────
     function firebaseReady() {
-      return !!(window._firebaseAuth && window._firebaseSignIn && window._firebaseSignUp);
+      const hasCore = !!(window._firebaseAuth && window._firebaseSignIn);
+      if (mode.value === 'register') {
+        return hasCore && !!window._firebaseSignUp;
+      }
+      return hasCore;
+    }
+
+
+    function validateRegistrationForm() {
+      if (!form.displayName || form.displayName.trim().length < 2) {
+        return 'Please enter your full name (at least 2 characters).';
+      }
+
+      if (role.value === 'patient') {
+        if (!form.dateOfBirth) return 'Please select your date of birth.';
+        if (!['male', 'female', 'other', 'prefer_not_to_say'].includes(form.gender)) {
+          return 'Please select a valid gender.';
+        }
+      }
+
+      if (role.value === 'doctor') {
+        if (!form.specialization || form.specialization.trim().length < 2) {
+          return 'Please enter your specialization.';
+        }
+        if (!form.licenseNumber || form.licenseNumber.trim().length < 4) {
+          return 'Please enter a valid license number.';
+        }
+        const quals = form.qualifications
+          .split(',')
+          .map((q) => q.trim())
+          .filter(Boolean);
+        if (!quals.length) {
+          return 'Please add at least one qualification.';
+        }
+      }
+
+      return null;
     }
 
     async function handleSubmit() {
@@ -44,10 +80,18 @@ export const LoginView = defineComponent({
       }
 
       if (!firebaseReady()) {
-        error.value =
-          'Firebase is not configured. ' +
-          'Please uncomment the Firebase SDK block in index.html and add your project config.';
+        error.value = mode.value === 'register'
+          ? 'Firebase register SDK is not configured. Please expose window._firebaseSignUp in index.html.'
+          : 'Firebase login SDK is not configured. Please expose window._firebaseAuth and window._firebaseSignIn in index.html.';
         return;
+      }
+
+      if (mode.value === 'register') {
+        const registrationError = validateRegistrationForm();
+        if (registrationError) {
+          error.value = registrationError;
+          return;
+        }
       }
 
       loading.value = true;
@@ -56,6 +100,7 @@ export const LoginView = defineComponent({
       try {
         // ── Step 1: Authenticate with Firebase to get a real ID token ──────────
         let firebaseUser;
+        let profileCreated = false;
 
         if (mode.value === 'login') {
           const cred = await window._firebaseSignIn(
@@ -90,20 +135,21 @@ export const LoginView = defineComponent({
 
           const body = role.value === 'patient'
             ? {
-                displayName:  form.displayName,
+                displayName:  form.displayName.trim(),
                 dateOfBirth:  form.dateOfBirth,
                 gender:       form.gender,
                 bloodGroup:   form.bloodGroup,
               }
             : {
-                displayName:        form.displayName,
-                specialization:     form.specialization,
-                licenseNumber:      form.licenseNumber,
+                displayName:        form.displayName.trim(),
+                specialization:     form.specialization.trim(),
+                licenseNumber:      form.licenseNumber.trim(),
                 qualifications:     form.qualifications.split(',').map(q => q.trim()).filter(Boolean),
                 yearsOfExperience:  Number(form.yearsOfExperience),
               };
 
           await api.post(endpoint, body);
+          profileCreated = true;
         }
 
         // ── Step 4: Fetch full user profile from Firestore via backend ─────────
@@ -112,7 +158,12 @@ export const LoginView = defineComponent({
         const profile = meRes.profile || {};
 
         if (!profile.role) {
-          // Profile doc doesn't exist yet (first login before register completes)
+          // Firebase account exists but backend profile is missing.
+          if (mode.value === 'login') {
+            mode.value = 'register';
+            error.value = 'Your account exists, but your profile is incomplete. Please finish registration.';
+            return;
+          }
           throw new Error('User profile not found. Please complete registration first.');
         }
 
@@ -133,6 +184,17 @@ export const LoginView = defineComponent({
           'auth/network-request-failed': 'Network error. Check your connection.',
           'auth/user-disabled':        'This account has been disabled.',
         };
+        if (mode.value === 'register' && firebaseUser && !profileCreated) {
+          try {
+            await firebaseUser.delete();
+          } catch (cleanupErr) {
+            console.warn('[auth] Failed to roll back Firebase user after registration error:', cleanupErr.message);
+          }
+          window.appState.token = null;
+          localStorage.removeItem('ml_token');
+          localStorage.removeItem('ml_user');
+        }
+
         error.value = e.code ? (firebaseErrors[e.code] || e.message) : e.message;
       } finally {
         loading.value = false;
@@ -148,7 +210,13 @@ export const LoginView = defineComponent({
       handleSubmit();
     }
 
-    return { mode, role, loading, error, form, handleSubmit, demoLogin, firebaseReady };
+    function firebaseHint() {
+      return mode.value === 'register'
+        ? '⚠ Firebase register SDK not configured. Expose window._firebaseSignUp in index.html to enable registration.'
+        : '⚠ Firebase login SDK not configured. Expose window._firebaseAuth and window._firebaseSignIn in index.html to enable login.';
+    }
+
+    return { mode, role, loading, error, form, handleSubmit, demoLogin, firebaseReady, firebaseHint, validateRegistrationForm };
   },
 
   template: `
@@ -169,7 +237,7 @@ export const LoginView = defineComponent({
 
         <!-- Firebase not configured warning -->
         <div v-if="!firebaseReady()" class="mb-4 px-4 py-3 rounded-lg bg-amber-950/50 border border-amber-800/40 text-amber-400 text-xs mono">
-          ⚠ Firebase SDK not configured. Uncomment the Firebase block in <span class="text-amber-300">index.html</span> and add your project credentials to enable login.
+          {{ firebaseHint() }}
         </div>
 
         <!-- Demo buttons (only shown when Firebase is ready) -->

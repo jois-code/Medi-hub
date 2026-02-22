@@ -154,7 +154,15 @@ export const registerDoctor = async (req, res, next) => {
  */
 export const getMe = async (req, res, next) => {
   try {
-    const { uid, role } = req.user;
+    const { uid, role, profileExists } = req.user;
+
+    if (!profileExists || !role) {
+      return res.json({
+        user: req.user,
+        profile: null,
+      });
+    }
+
     const collection = role === 'patient' ? COLLECTIONS.PATIENTS : COLLECTIONS.DOCTORS;
     const profileDoc = await db.collection(collection).doc(uid).get();
 

@@ -16,16 +16,24 @@ const { createApp, onMounted } = Vue;
 // ── Wait for Firebase auth state before navigating ────────────────────────────
 function waitForFirebaseAuth() {
   return new Promise((resolve) => {
-    if (!window._firebaseAuth) {
+    const auth = window._firebaseAuth;
+    if (!auth) {
       // Firebase not configured — resolve immediately (login page will explain)
       resolve(null);
       return;
     }
-    // onAuthStateChanged fires once with the current user (or null) on load
-    const unsubscribe = window._firebaseAuth.onAuthStateChanged((user) => {
-      unsubscribe(); // Only need it once
-      resolve(user);
-    });
+
+    if (typeof auth.onAuthStateChanged === 'function') {
+      // onAuthStateChanged fires once with the current user (or null) on load
+      const unsubscribe = auth.onAuthStateChanged((user) => {
+        unsubscribe(); // Only need it once
+        resolve(user);
+      });
+      return;
+    }
+
+    // Some Firebase bundles expose only currentUser without an observer method.
+    resolve(auth.currentUser || null);
   });
 }
 
