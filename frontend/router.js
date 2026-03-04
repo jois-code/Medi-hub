@@ -8,6 +8,12 @@ import { CollaboratorsView }  from './views/CollaboratorsView.js';
 import { NotificationsView }  from './views/NotificationsView.js';
 import { DoctorsView }        from './views/DoctorsView.js';
 import { DoctorProfileView }  from './views/DoctorProfileView.js';
+import { EmergencyView }      from './views/EmergencyView.js';
+import { EmergencyAccessView } from './views/EmergencyAccessView.js';
+import { AppointmentsView }   from './views/AppointmentsView.js';
+import { TimelineView }       from './views/TimelineView.js';
+import { AnalyticsView }      from './views/AnalyticsView.js';
+import { SettingsView }       from './views/SettingsView.js';
 import { appState }           from './services/state.js';
 
 const { createRouter, createWebHashHistory } = VueRouter;
@@ -27,6 +33,7 @@ const NotFoundView = {
 const routes = [
   { path: '/',       redirect: '/dashboard' },
   { path: '/login',  component: LoginView, meta: { public: true } },
+  { path: '/emergency-access/:token', component: EmergencyAccessView, meta: { public: true } },
   {
     path: '/',
     component: AppLayout,
@@ -39,6 +46,11 @@ const routes = [
       { path: 'notifications',   component: NotificationsView },
       { path: 'doctors',         component: DoctorsView },
       { path: 'doctor-profile',  component: DoctorProfileView },
+      { path: 'emergency',       component: EmergencyView },
+      { path: 'appointments',    component: AppointmentsView },
+      { path: 'timeline',        component: TimelineView },
+      { path: 'analytics',       component: AnalyticsView },
+      { path: 'settings',        component: SettingsView },
     ],
   },
   { path: '/:pathMatch(.*)*', component: NotFoundView },

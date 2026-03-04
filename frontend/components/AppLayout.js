@@ -20,14 +20,14 @@ export const AppLayout = defineComponent({
           { label: 'Records',    icon: '⊕', path: '/records' },
           { label: 'Requests',   icon: '⊘', path: '/access-requests' },
           { label: 'Inbox',      icon: '◉', path: '/notifications' },
-          { label: 'Doctors',    icon: '⊙', path: '/doctors' },
+          { label: 'Emergency',  icon: '⚕', path: '/emergency' },
         ];
       }
       return [
         { label: 'Home',       icon: '◈', path: '/dashboard' },
         { label: 'Requests',   icon: '⊘', path: '/access-requests' },
         { label: 'Inbox',      icon: '◉', path: '/notifications' },
-        { label: 'Doctors',    icon: '⊙', path: '/doctors' },
+        { label: 'Appts',      icon: '📅', path: '/appointments' },
         { label: 'Profile',    icon: '◎', path: '/doctor-profile' },
       ];
     });

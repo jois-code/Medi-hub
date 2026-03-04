@@ -92,4 +92,35 @@ export const schemas = {
     skill: Joi.string().min(2).max(100).required(),
     note: Joi.string().max(400).optional(),
   }),
+
+  generateEmergencyToken: Joi.object({
+    expiryHours: Joi.number().integer().min(1).max(72).default(24),
+    label: Joi.string().max(100).optional(),
+  }),
+
+  createAppointment: Joi.object({
+    patientId: Joi.string().required(),
+    dateTime: Joi.string().isoDate().required(),
+    duration: Joi.number().integer().min(5).max(480).default(30),
+    type: Joi.string().valid('in-person', 'video', 'phone').required(),
+    notes: Joi.string().max(1000).optional().allow(''),
+  }),
+
+  updateAppointmentStatus: Joi.object({
+    status: Joi.string().valid('confirmed', 'cancelled', 'completed', 'no_show').required(),
+  }),
+
+  updateProfile: Joi.object({
+    displayName: Joi.string().min(2).max(80).optional(),
+    phone: Joi.string().pattern(/^\+?[0-9]{7,15}$/).optional(),
+    emergencyContact: Joi.object({
+      name: Joi.string().required(),
+      phone: Joi.string().required(),
+      relation: Joi.string().required(),
+    }).optional(),
+  }),
+
+  updatePreferences: Joi.object({
+    emailNotifications: Joi.boolean().optional(),
+  }),
 };

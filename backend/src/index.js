@@ -18,6 +18,10 @@ import recordsRoutes from './routes/records.routes.js';
 import accessRequestsRoutes from './routes/access-requests.routes.js';
 import doctorsRoutes from './routes/doctors.routes.js';
 import notificationsRoutes from './routes/notifications.routes.js';
+import emergencyRoutes from './routes/emergency.routes.js';
+import appointmentsRoutes from './routes/appointments.routes.js';
+import analyticsRoutes from './routes/analytics.routes.js';
+import settingsRoutes from './routes/settings.routes.js';
 
 // Import middleware
 import { errorHandler, notFound } from './middleware/error.middleware.js';
@@ -94,6 +98,10 @@ app.use('/api/records', recordsRoutes);
 app.use('/api/access-requests', accessRequestsRoutes);
 app.use('/api/doctors', doctorsRoutes);
 app.use('/api/notifications', notificationsRoutes);
+app.use('/api/emergency', emergencyRoutes);
+app.use('/api/appointments', appointmentsRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Expose patient-scoped record routes via /api/patients prefix too
 app.use('/api/patients', recordsRoutes);
