@@ -29,6 +29,11 @@ export const Sidebar = defineComponent({
           { label: 'Collaborators',   icon: '◎', path: '/collaborators' },
           { label: 'Notifications',   icon: '◉', path: '/notifications' },
           { label: 'Find Doctors',    icon: '⊙', path: '/doctors' },
+          { label: 'Emergency QR',    icon: '⚕', path: '/emergency' },
+          { label: 'Appointments',    icon: '📅', path: '/appointments' },
+          { label: 'Timeline',        icon: '◫', path: '/timeline' },
+          { label: 'Analytics',       icon: '⊞', path: '/analytics' },
+          { label: 'Settings',        icon: '⚙', path: '/settings' },
         ];
       }
       return [
@@ -36,7 +41,10 @@ export const Sidebar = defineComponent({
         { label: 'My Requests',     icon: '⊘', path: '/access-requests' },
         { label: 'Notifications',   icon: '◉', path: '/notifications' },
         { label: 'Find Doctors',    icon: '⊙', path: '/doctors' },
+        { label: 'Appointments',    icon: '📅', path: '/appointments' },
+        { label: 'Analytics',       icon: '⊞', path: '/analytics' },
         { label: 'My Profile',      icon: '◎', path: '/doctor-profile' },
+        { label: 'Settings',        icon: '⚙', path: '/settings' },
       ];
     });
 

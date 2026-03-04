@@ -51,6 +51,8 @@ export const COLLECTIONS = {
   ENDORSEMENTS: 'endorsements',
   NOTIFICATIONS: 'notifications',
   ACTIVITY_LOG: 'activity_log',
+  EMERGENCY_TOKENS: 'emergency_tokens',
+  APPOINTMENTS: 'appointments',
 };
 
 export default admin;
